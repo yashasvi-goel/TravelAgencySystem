@@ -21,6 +21,13 @@ public class UserService {
     public User GetUser(Integer userId){
         return storage.GetUser(userId);
     }
+    public void GetUserDetails(Integer userId){
+        User user = storage.GetUser(userId);
+        System.out.println("User details:");
+        System.out.println("name: "+user.getName());
+        System.out.println("passenger ID: "+user.getId());
+        System.out.println("balance: "+user.getBalance());
+    }
 
     public boolean CheckBalance(Integer userId, Integer amount) {
         User user = storage.GetUser(userId);

@@ -11,7 +11,6 @@ public class User {
     Integer Id ;
     String Name;
     String Nationality;
-//    DOB(date) TODO
     BloodGroups Blood_group;
     MembershipType Membership;
     Integer Balance;

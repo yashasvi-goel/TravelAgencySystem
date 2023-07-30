@@ -1,9 +1,6 @@
 package org.example;
 
-import org.example.Services.ActivityService;
-import org.example.Services.DestinationService;
-import org.example.Services.TravelPackageService;
-import org.example.Services.UserService;
+import org.example.Services.*;
 import org.example.db.Storage;
 import org.example.models.*;
 
@@ -13,9 +10,10 @@ import java.util.List;
 public class Main {
     public static void main(String[] args) {
         Storage storage = new Storage();
-        ActivityService activityService = new ActivityService(storage);
-        DestinationService destinationService = new DestinationService(storage,activityService);
+        ActivityUserMappingService activityUserMappingS=new ActivityUserMappingService(storage);
+        ActivityService activityService = new ActivityService(storage,activityUserMappingS);
         UserService userService = new UserService(storage);
+        DestinationService destinationService = new DestinationService(storage,activityService,userService);
         TravelPackageService travelPackageService=new TravelPackageService(storage,activityService,
                 destinationService,userService);
 
@@ -35,6 +33,7 @@ public class Main {
 
         User user=User.builder().
                 Id(0).
+                Name("User").
                 Balance(5000).
                 Blood_group(BloodGroups.A_POSITIVE).
                 Membership(MembershipType.STANDARD).
@@ -49,14 +48,24 @@ public class Main {
         destinationService.AddActivityToDestination(activity,1);
         travelPackageService.GetPackageById(0);
 
+        System.out.println();
+        System.out.println();
+        destinationService.ListAllActivities(0);
+        System.out.println();
+        activityService.GetActivitiesForUser(0);
+
         System.out.println("Booking Id is:"+travelPackageService.BookPackage(user.getId(),0));
         System.out.println("Booking Id is:"+travelPackageService.BookPackage(user.getId(),1));
-        //TODO reserve an activity and check all this
-        // List all activites for a destination
-        // give details of each user
-        // List all activites
-        // List all destinations
+        System.out.println("Booking Id for activity is:"+destinationService.ReserveActivityForUser(0,1,0));
+        System.out.println();
+        System.out.println();
+        travelPackageService.GetUserDetails(0);
+        System.out.println();
+        travelPackageService.GetPackages();
+        travelPackageService.GetPackageById(0);
+
+
+        //TODO
         // Write Junit tests
-//        travelPackageService.BookPackage(user.getId(),0);
     }
 }

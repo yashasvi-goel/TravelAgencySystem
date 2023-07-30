@@ -32,6 +32,5 @@ public class PackageUserMappingService {
                 UserId(user).
                 active(true).build();
         return storage.BookPackage(mapping, travelPackage.getCapacity(), user);
-//        Integer activityPk = storage.AddActivity(activity);
     }
 }

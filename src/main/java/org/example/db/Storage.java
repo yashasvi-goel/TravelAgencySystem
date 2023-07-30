@@ -10,6 +10,9 @@ public class Storage {
     Map<Integer, Set<PackageUserMapping>> userPackage;//user_id:Set<PackageUserMapping>
     Map<Integer, Set<PackageUserMapping>> packageUserMapping; // package_id:Set<PackageUserMapping>
     Map<Integer, PackageUserMapping> packageUserMap; // bookind_id:PackageUserMapping
+    Map<Integer, Set<ActivityUserMapping>> userActivity;//user_id:Set<PackageUserMapping>
+    Map<Integer, Set<ActivityUserMapping>> activityUserMapping; // act_id:Set<PackageUserMapping>
+    Map<Integer, ActivityUserMapping> activityUserMap; // bookind_id:PackageUserMapping
     Map<Integer, Destination> destinationMap;// dest_id:Destination
     Map<Integer, Activity> activityMap;// act_id:Activity
     Map<Integer, User> userMap;// user_id: User
@@ -23,6 +26,9 @@ public class Storage {
         this.destinationMap=new HashMap<>();
         this.activityMap=new HashMap<>();
         this.activities=new HashSet<>();
+        this.activityUserMapping=new HashMap<>();
+        this.activityUserMap=new HashMap<>();
+        this.userActivity=new HashMap<>();
     }
 
     public TravelPackage AddPackage(TravelPackage travelPackage) {
@@ -40,6 +46,7 @@ public class Storage {
         user.setId(primaryKey);
         this.userMap.put(primaryKey,user);
         this.userPackage.put(user.getId(),new HashSet<>());
+        this.userActivity.put(user.getId(),new HashSet<>());
         return user;
     }
     public boolean UpdateUser(User user) {
@@ -75,10 +82,11 @@ public class Storage {
         if(CheckActivity(activity.getName())){
             return -1;
         }
-        Integer primaryKey=this.destinationMap.size(); //Would be done using SQL functionality
+        Integer primaryKey=this.activityMap.size(); //Would be done using SQL functionality
         activity.setId(primaryKey);
         this.activityMap.put(primaryKey,activity);
         this.activities.add(activity.getName());
+        this.activityUserMapping.put(activity.getId(), new HashSet<>());
         return primaryKey;
     }
 
@@ -90,6 +98,12 @@ public class Storage {
         // equivalent of a SQL (select * from package where id ={id})
         return this.packageMap.get(id);
     }
+
+    public Map<Integer, TravelPackage> GetPackages() {
+        // equivalent of a SQL (select * from package where id ={id})
+        return this.packageMap;
+    }
+
     public Set<PackageUserMapping> GetPackageByUser(Integer userId) {
         // equivalent of a SQL (select * from package_user_mapping where user_id ={userId})
         return this.userPackage.get(userId);
@@ -97,6 +111,14 @@ public class Storage {
     public Set<PackageUserMapping> GetUsersByPackage(Integer id) {
         // equivalent of a SQL (select * from package_user_mapping where package_id ={id})
         return this.packageUserMapping.get(id);
+    }
+    public Set<ActivityUserMapping> GetActivityByUser(Integer userId) {
+        // equivalent of a SQL (select * from package_user_mapping where user_id ={userId})
+        return this.userActivity.get(userId);
+    }
+    public Set<ActivityUserMapping> GetUsersByActivity(Integer id) {
+        // equivalent of a SQL (select * from package_user_mapping where package_id ={id})
+        return this.activityUserMapping.get(id);
     }
 
     public PackageUserMapping BookPackage(PackageUserMapping packageUserMapping, Integer capacity, Integer userId) {
@@ -115,6 +137,24 @@ public class Storage {
         }
         this.userPackage.get(userId).add(packageUserMapping);
         return packageUserMapping;
+    }
+    
+    public ActivityUserMapping BookActivity(ActivityUserMapping activityUserMapping, Integer capacity, Integer userId) {
+        // equivalent of a SQL optimistic locking inside a transaction.
+
+        Integer primaryKey=this.activityMap.size(); //Would be done using SQL functionality
+        activityUserMapping.setId(primaryKey);
+        activityUserMap.put(primaryKey,activityUserMapping);
+        Set<ActivityUserMapping> activityUserMappings = this.activityUserMapping.get(activityUserMapping.getActivity());
+        if(activityUserMappings.size()<capacity){
+            activityUserMappings.add(activityUserMapping);
+            this.activityUserMapping.put(activityUserMapping.getActivity(),activityUserMappings);
+        }else{
+            System.out.println("There is no more space left on the activity.");
+            return null;
+        }
+        this.userActivity.get(userId).add(activityUserMapping);
+        return activityUserMapping;
     }
 
     public Destination GetDestination(Integer id) {

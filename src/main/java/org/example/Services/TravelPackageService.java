@@ -7,8 +7,8 @@ import org.example.models.PackageUserMapping;
 import org.example.models.TravelPackage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-//@RequiredArgsConstructor
 public class TravelPackageService {
     public TravelPackageService(Storage storage, ActivityService activityService, DestinationService destinationService, UserService userService) {
         this.storage = storage;
@@ -42,7 +42,7 @@ public class TravelPackageService {
         return travelPackage;
     }
 
-    public void GetPackageById(Integer id) {//this is for searching, not for the user to explore
+    public void GetPackageById(Integer id) {
         TravelPackage packageById = storage.GetPackage(id);
         if (Objects.isNull(packageById)) {
             System.out.println("This package ID doesn't exist.");
@@ -74,7 +74,21 @@ public class TravelPackageService {
             System.out.println(destination.toString() + " " + activities);
         });
         System.out.println(activityMap.toString());
-    }// TODO create a search/explore
+        Set<PackageUserMapping> packageUserMappings = storage.GetUsersByPackage(id);
+        if(packageUserMappings.size()==0){
+            System.out.println("No users registered for this package.");
+            return;
+        }
+        System.out.println("List of user IDs registered for this package:");
+        List<Integer> userIds = packageUserMappings.stream().map(PackageUserMapping::getUserId).toList();
+        System.out.println(userIds.toString());
+    }
+
+    public void GetPackages(){
+        Map<Integer, TravelPackage> travelPackageMap = storage.GetPackages();
+        System.out.println("List of packages available:");
+        travelPackageMap.values().forEach(System.out::println);
+    }
 
     public Integer BookPackage(Integer userId, Integer packageId) {
         TravelPackage travelPackage = storage.GetPackage(packageId);
@@ -88,7 +102,16 @@ public class TravelPackageService {
             userService.UpdateBalance(userId, travelPackage.getCost());
         }
         return packageUserMapping.getId();
+    }
 
+    public void GetUserDetails(Integer userId){
+        Set<PackageUserMapping> packageUserMappings = storage.GetPackageByUser(userId);
+        userService.GetUserDetails(userId);
+        packageUserMappings.forEach(packageUserMapping -> {
+            TravelPackage travelPackage = storage.GetPackage(packageUserMapping.getPackageId());
+            System.out.println("Travel Package details:"+ travelPackage);
+            this.activityService.GetActivitiesForUser(userId);
+        });
     }
 
 }

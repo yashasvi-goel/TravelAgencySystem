@@ -2,27 +2,22 @@ package org.example.models;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter
 @Builder
-public class PackageUserMapping {
+public class ActivityUserMapping {
     Integer Id;
     Integer UserId;
-    Integer PackageId;
-    Boolean active;
+    Integer activity;
 
     @Override
     public String toString() {
-        return "PackageUserMapping{" +
+        return "ActivityUserMapping{" +
                 "Id=" + Id +
                 ", UserId=" + UserId +
-                ", PackageId=" + PackageId +
-                ", active=" + active +
+                ", activity=" + activity +
                 '}';
     }
 }
